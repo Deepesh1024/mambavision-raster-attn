@@ -1,0 +1,86 @@
+[
+  {
+    "variant": "baseline",
+    "variant_label": "Baseline (14x14)",
+    "resolution": "512x512",
+    "latency_ms": 0.5775728225708008,
+    "peak_vram_gb": 0.280246272
+  },
+  {
+    "variant": "baseline",
+    "variant_label": "Baseline (14x14)",
+    "resolution": "1024x1024",
+    "latency_ms": 1.5657024383544922,
+    "peak_vram_gb": 0.30438912
+  },
+  {
+    "variant": "baseline",
+    "variant_label": "Baseline (14x14)",
+    "resolution": "768x1024",
+    "latency_ms": 1.5681023597717285,
+    "peak_vram_gb": 0.296804352
+  },
+  {
+    "variant": "square8",
+    "variant_label": "Square 8x8",
+    "resolution": "512x512",
+    "latency_ms": 0.3492863893508911,
+    "peak_vram_gb": 0.274558976
+  },
+  {
+    "variant": "square8",
+    "variant_label": "Square 8x8",
+    "resolution": "1024x1024",
+    "latency_ms": 0.8028063774108887,
+    "peak_vram_gb": 0.298151936
+  },
+  {
+    "variant": "square8",
+    "variant_label": "Square 8x8",
+    "resolution": "768x1024",
+    "latency_ms": 0.7654384136199951,
+    "peak_vram_gb": 0.290287616
+  },
+  {
+    "variant": "raster_s2",
+    "variant_label": "Raster s=2",
+    "resolution": "512x512",
+    "latency_ms": 0.3630255937576294,
+    "peak_vram_gb": 0.274558976
+  },
+  {
+    "variant": "raster_s2",
+    "variant_label": "Raster s=2",
+    "resolution": "1024x1024",
+    "latency_ms": 1.061689567565918,
+    "peak_vram_gb": 0.299200512
+  },
+  {
+    "variant": "raster_s2",
+    "variant_label": "Raster s=2",
+    "resolution": "768x1024",
+    "latency_ms": 0.943017578125,
+    "peak_vram_gb": 0.290287616
+  },
+  {
+    "variant": "raster_s4",
+    "variant_label": "Raster s=4",
+    "resolution": "512x512",
+    "latency_ms": 0.3519711971282959,
+    "peak_vram_gb": 0.274558976
+  },
+  {
+    "variant": "raster_s4",
+    "variant_label": "Raster s=4",
+    "resolution": "1024x1024",
+    "latency_ms": 1.3279824256896973,
+    "peak_vram_gb": 0.299200512
+  },
+  {
+    "variant": "raster_s4",
+    "variant_label": "Raster s=4",
+    "resolution": "768x1024",
+    "latency_ms": 1.2374624252319335,
+    "peak_vram_gb": 0.290287616
+  }
+]
