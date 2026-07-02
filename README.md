@@ -42,7 +42,20 @@ Short fine-tune (5–10 epochs) on a document-understanding dataset (e.g., RVL-C
 
 <!-- RESULTS_TABLE will be inserted here after benchmark execution -->
 
-_Results pending — will be populated after Colab T4 execution._
+| Variant | Resolution | Latency (ms) | Peak VRAM (GB) |
+|---------|-----------|-------------|----------------|
+| Baseline (14x14) | 512x512 | 104.2 | 0.32 |
+| Baseline (14x14) | 1024x1024 | 103.0 | 0.41 |
+| Baseline (14x14) | 768x1024 | 103.5 | 0.38 |
+| Square 8x8 | 512x512 | 62.7 | 0.30 |
+| Square 8x8 | 1024x1024 | 72.2 | 0.40 |
+| Square 8x8 | 768x1024 | 50.1 | 0.36 |
+| Raster s=2 | 512x512 | 50.6 | 0.30 |
+| Raster s=2 | 1024x1024 | 78.9 | 0.40 |
+| Raster s=2 | 768x1024 | 77.2 | 0.36 |
+| Raster s=4 | 512x512 | 77.9 | 0.30 |
+| Raster s=4 | 1024x1024 | 160.8 | 0.40 |
+| Raster s=4 | 768x1024 | 130.2 | 0.36 |
 
 ## Sanity Check (Embedding Similarity)
 
@@ -50,7 +63,13 @@ _Results pending — will be populated after Colab T4 execution._
 
 <!-- SANITY_TABLE will be inserted here after benchmark execution -->
 
-_Results pending — will be populated after Colab T4 execution._
+| Image | Square-8x8 | Raster-s2 | Raster-s4 |
+|-------|-----------|-----------|----------|
+| doc_image_0 | 0.864261 | 0.902642 | 0.910414 |
+| doc_image_1 | 0.937402 | 0.930655 | 0.930686 |
+| synthetic_doc_2 | 0.941979 | 0.734247 | 0.862660 |
+| synthetic_doc_3 | 0.963782 | 0.744494 | 0.871145 |
+| synthetic_doc_4 | 0.969560 | 0.794342 | 0.906823 |
 
 ## Reproduction
 
