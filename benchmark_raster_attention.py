@@ -535,27 +535,45 @@ def benchmark_variant(model, vname, device, resolution, warmup=5, iterations=20)
         torch.cuda.reset_peak_memory_stats()
 
         # Timed iterations
+        import numpy as np
+        latencies = []
         start_event = torch.cuda.Event(enable_timing=True)
         end_event = torch.cuda.Event(enable_timing=True)
 
-        torch.cuda.synchronize()
-        start_event.record()
-
         for _ in range(iterations):
+            torch.cuda.synchronize()
+            start_event.record()
             with torch.no_grad():
                 _ = attn_block(x)
+            end_event.record()
+            torch.cuda.synchronize()
+            latencies.append(start_event.elapsed_time(end_event))
 
-        end_event.record()
-        torch.cuda.synchronize()
-
-        elapsed_ms = start_event.elapsed_time(end_event)
-        avg_ms = elapsed_ms / iterations
+        latencies = np.array(latencies)
+        avg_ms = float(np.mean(latencies))
+        std_ms = float(np.std(latencies))
+        
+        # Profile only for 1024x1024 on Baseline and Raster s=4
+        if H == 1024 and W == 1024 and vname in ['baseline', 'raster_s4']:
+            print(f"    [DEBUG] Running torch.profiler for {vname} at 1024x1024...")
+            with torch.profiler.profile(
+                activities=[torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.CUDA],
+                record_shapes=True,
+                profile_memory=False,
+                with_stack=False,
+            ) as prof:
+                with torch.no_grad():
+                    _ = attn_block(x)
+                torch.cuda.synchronize()
+            
+            prof_table = prof.key_averages().table(sort_by="cuda_time_total", row_limit=10)
+            (RESULTS_DIR / f"profile_{vname}_1024.txt").write_text(prof_table)
         peak_vram = torch.cuda.max_memory_allocated() / 1e9
 
         del x
         torch.cuda.empty_cache()
 
-        return {"latency_ms": avg_ms, "peak_vram_gb": peak_vram}
+        return {"latency_ms": avg_ms, "latency_std": std_ms, "peak_vram_gb": peak_vram}
 
     except torch.cuda.OutOfMemoryError as e:
         del x
@@ -614,8 +632,9 @@ def run_benchmarks(base_model, device, use_deepcopy):
                 print(f"ERROR: {r['error']}")
             else:
                 entry['latency_ms'] = r['latency_ms']
+                entry['latency_std'] = r['latency_std']
                 entry['peak_vram_gb'] = r['peak_vram_gb']
-                print(f"latency={r['latency_ms']:.1f}ms, VRAM={r['peak_vram_gb']:.2f}GB")
+                print(f"latency={r['latency_ms']:.2f}ms ± {r['latency_std']:.2f}ms, VRAM={r['peak_vram_gb']:.2f}GB")
 
             results.append(entry)
 
@@ -627,14 +646,15 @@ def run_benchmarks(base_model, device, use_deepcopy):
     print("BENCHMARK RESULTS TABLE")
     print("=" * 70)
 
-    header = f"{'Variant':<20} {'Resolution':<12} {'Latency(ms)':>12} {'Peak VRAM(GB)':>14}"
+    header = f"{'Variant':<20} {'Resolution':<12} {'Latency (ms)':>18} {'Peak VRAM (GB)':>14}"
     print(header)
     print("-" * len(header))
     for r in results:
         if 'error' in r:
-            print(f"{r.get('variant_label', r['variant']):<20} {r['resolution']:<12} {'ERROR':>12} {r['error'][:14]:>14}")
+            print(f"{r.get('variant_label', r['variant']):<20} {r['resolution']:<12} {'ERROR':>18} {r['error'][:14]:>14}")
         else:
-            print(f"{r.get('variant_label', r['variant']):<20} {r['resolution']:<12} {r['latency_ms']:>12.1f} {r['peak_vram_gb']:>14.2f}")
+            lat_str = f"{r['latency_ms']:.2f} ± {r['latency_std']:.2f}"
+            print(f"{r.get('variant_label', r['variant']):<20} {r['resolution']:<12} {lat_str:>18} {r['peak_vram_gb']:>14.2f}")
 
     # Save markdown table
     md = "# Benchmark Results\n\n"
@@ -644,7 +664,8 @@ def run_benchmarks(base_model, device, use_deepcopy):
         if 'error' in r:
             md += f"| {r.get('variant_label', r['variant'])} | {r['resolution']} | ERROR | {r['error']} |\n"
         else:
-            md += f"| {r.get('variant_label', r['variant'])} | {r['resolution']} | {r['latency_ms']:.1f} | {r['peak_vram_gb']:.2f} |\n"
+            lat_str = f"{r['latency_ms']:.2f} ± {r['latency_std']:.2f}"
+            md += f"| {r.get('variant_label', r['variant'])} | {r['resolution']} | {lat_str} | {r['peak_vram_gb']:.2f} |\n"
 
     (RESULTS_DIR / "benchmark_table.md").write_text(md)
     print(f"\nSaved to {RESULTS_DIR / 'benchmark_table.md'}")
